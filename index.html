@@ -48,10 +48,17 @@
         let selectedMembers = [];
 
         async function fetchMembers() {
-           const response = await fetch('https://script.google.com/macros/s/AKfycbxxgRte8Zs8eG7xdzWL0K8VIyaMU-kXZkndd40oU9FxLN1uvG5agyTUHaSzXnHDPpe7/exec');
+            const response = await fetch('https://script.google.com/macros/s/AKfycbxBUlsPzkLjyy2pMdu0Jz2W9ooY2HTRXzS3NjkM0ywzkv9lrFEtBxdDzL5Ve7R6fdPfGw/exec');
             members = await response.json();
             renderMembers();
-            $("#searchMember").autocomplete({ source: members }); // Move autocomplete initialization here
+
+            // ✅ Ensure autocomplete updates when data is fetched
+            $("#searchMember").autocomplete({ 
+                source: function(request, response) {
+                    let results = $.ui.autocomplete.filter(members, request.term);
+                    response(results.slice(0, 25)); // Limit to 25 suggestions
+                }
+            });
         }
 
         function renderMembers() {
@@ -78,9 +85,14 @@
             let memberName = input.value.trim();
             if (members.includes(memberName) && !selectedMembers.includes(memberName)) {
                 selectedMembers.push(memberName);
-                renderSelected();
+                updateSelectedMembersDisplay();
             }
             input.value = "";
+        }
+
+        function updateSelectedMembersDisplay() {
+            let list = document.getElementById("memberList");
+            list.innerHTML = selectedMembers.map(member => `<div>${member}</div>`).join('');
         }
 
         async function saveData() {
@@ -89,12 +101,13 @@
                 alert("Please enter a date.");
                 return;
             }
-            await fetch('YOUR_GOOGLE_SHEETS_API_URL', {
+            let response = await fetch('https://script.google.com/macros/s/AKfycbxBUlsPzkLjyy2pMdu0Jz2W9ooY2HTRXzS3NjkM0ywzkv9lrFEtBxdDzL5Ve7R6fdPfGw/exec', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ date, members: selectedMembers })
             });
-            alert("Data saved successfully!");
+            let result = await response.text();
+            alert("Data saved successfully: " + result);
         }
 
         $(document).ready(() => {
