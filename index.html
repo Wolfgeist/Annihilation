@@ -1,105 +1,105 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Diablo Immortal Team Manager</title>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-	<style>
-		body {
-			font-family: Arial, sans-serif;
-			padding: 20px;
-		}
-		.member-list {
-			display: flex;
-			flex-direction: column;
-		}
-		.member {
-			display: flex;
-			align-items: center;
-			margin: 5px 0;
-		}
-		.member input {
-			margin-right: 10px;
-		}
-		.autocomplete {
-			margin-top: 10px;
-		}
-	</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diablo Immortal Team Manager</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        .member-list {
+            display: flex;
+            flex-direction: column;
+        }
+        .member {
+            display: flex;
+            align-items: center;
+            margin: 5px 0;
+        }
+        .member input {
+            margin-right: 10px;
+        }
+        .autocomplete {
+            margin-top: 10px;
+        }
+    </style>
 </head>
 <body>
-	<h2>Diablo Immortal Team Participation</h2>
-	<label for="date">Enter Date (MM-DD-YYYY):</label>
-	<input type="text" id="date" placeholder="MM-DD-YYYY">
-	
-	<h3>Mark Participants:</h3>
-	<div class="member-list" id="memberList"></div>
+    <h2>Diablo Immortal Team Participation</h2>
+    <label for="date">Enter Date (MM-DD-YYYY):</label>
+    <input type="text" id="date" placeholder="MM-DD-YYYY">
+    
+    <h3>Mark Participants:</h3>
+    <div class="member-list" id="memberList"></div>
 
-	<h3>Quick Add Member:</h3>
-	<input type="text" id="searchMember" placeholder="Start typing...">
-	<button onclick="addMember()">Add</button>
-	
-	<button onclick="saveData()">Save to Google Sheets</button>
+    <h3>Quick Add Member:</h3>
+    <input type="text" id="searchMember" placeholder="Start typing...">
+    <button onclick="addMember()">Add</button>
+    
+    <button onclick="saveData()">Save to Google Sheets</button>
 
-	<script>
-		let members = [];
-		let selectedMembers = [];
+    <script>
+        let members = [];
+        let selectedMembers = [];
 
-		async function fetchMembers() {
-			const response = await fetch('https://script.google.com/macros/s/AKfycbxxgRte8Zs8eG7xdzWL0K8VIyaMU-kXZkndd40oU9FxLN1uvG5agyTUHaSzXnHDPpe7/exec');
-			members = await response.json();
-			renderMembers();
-		}
+        async function fetchMembers() {
+           const response = await fetch('https://script.google.com/macros/s/AKfycbxxgRte8Zs8eG7xdzWL0K8VIyaMU-kXZkndd40oU9FxLN1uvG5agyTUHaSzXnHDPpe7/exec');
+            members = await response.json();
+            renderMembers();
+            $("#searchMember").autocomplete({ source: members }); // Move autocomplete initialization here
+        }
 
-		function renderMembers() {
-			let list = document.getElementById("memberList");
-			list.innerHTML = "";
-			members.forEach(member => {
-				let div = document.createElement("div");
-				div.className = "member";
-				div.innerHTML = `<input type="checkbox" value="${member}" onclick="toggleMember(this)"> ${member}`;
-				list.appendChild(div);
-			});
-		}
+        function renderMembers() {
+            let list = document.getElementById("memberList");
+            list.innerHTML = "";
+            members.forEach(member => {
+                let div = document.createElement("div");
+                div.className = "member";
+                div.innerHTML = `<input type="checkbox" value="${member}" onclick="toggleMember(this)"> ${member}`;
+                list.appendChild(div);
+            });
+        }
 
-		function toggleMember(checkbox) {
-			if (checkbox.checked) {
-				selectedMembers.push(checkbox.value);
-			} else {
-				selectedMembers = selectedMembers.filter(m => m !== checkbox.value);
-			}
-		}
+        function toggleMember(checkbox) {
+            if (checkbox.checked) {
+                selectedMembers.push(checkbox.value);
+            } else {
+                selectedMembers = selectedMembers.filter(m => m !== checkbox.value);
+            }
+        }
 
-		function addMember() {
-			let input = document.getElementById("searchMember");
-			let memberName = input.value.trim();
-			if (members.includes(memberName) && !selectedMembers.includes(memberName)) {
-				selectedMembers.push(memberName);
-				renderSelected();
-			}
-			input.value = "";
-		}
+        function addMember() {
+            let input = document.getElementById("searchMember");
+            let memberName = input.value.trim();
+            if (members.includes(memberName) && !selectedMembers.includes(memberName)) {
+                selectedMembers.push(memberName);
+                renderSelected();
+            }
+            input.value = "";
+        }
 
-		async function saveData() {
-			let date = document.getElementById("date").value;
-			if (!date) {
-				alert("Please enter a date.");
-				return;
-			}
-			await fetch('YOUR_GOOGLE_SHEETS_API_URL', {
-				method: 'POST',
-				headers: {'Content-Type': 'application/json'},
-				body: JSON.stringify({ date, members: selectedMembers })
-			});
-			alert("Data saved successfully!");
-		}
+        async function saveData() {
+            let date = document.getElementById("date").value;
+            if (!date) {
+                alert("Please enter a date.");
+                return;
+            }
+            await fetch('YOUR_GOOGLE_SHEETS_API_URL', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ date, members: selectedMembers })
+            });
+            alert("Data saved successfully!");
+        }
 
-		$(document).ready(() => {
-			fetchMembers();
-			$("#searchMember").autocomplete({
-				source: members
-			});
-		});
-	</script>
+        $(document).ready(() => {
+            fetchMembers();
+        });
+    </script>
 </body>
 </html>
